@@ -1,2 +1,3 @@
 # dataviz
-Data Visualization Class project
+Data Visualization Class Project:
+Visualization of Air Strikes in World War II.
