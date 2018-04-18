@@ -5,7 +5,8 @@ library(geosphere)
 library(htmltools)
 library(mapview)
 library(crosstalk)
-
+library(plotly)
+library(shinydashboard)
 # df <- read_csv("operations.csv")
 # df <- st_as_sf(df) %>% filter(is.na(Country) == FALSE & is.na(`Target Longitude`) == FALSE &
 #                       is.na(`Takeoff Longitude`) == FALSE) %>% 
@@ -13,10 +14,16 @@ library(crosstalk)
 #   filter(`Target Longitude` > 0, `Takeoff Longitude` > 0)
 # df <- SharedData$new(df)
 
-shinyUI(
-  fluidPage(
-    
-    # Application title
-    column(12, leafletOutput("mymap", width="70%", height = 500))
+shinyUI(dashboardPage(
+  dashboardHeader(title = "Wordl Warr II Viz"),
+  dashboardSidebar(),
+  dashboardBody(
+    fluidRow(
+      leafletOutput("mymap")
+    ),
+    fluidRow(
+      plotlyOutput("time_series")
+    )
   )
+)
 )

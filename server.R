@@ -6,66 +6,61 @@ library(htmltools)
 library(mapview)
 library(crosstalk)
 library(sf)
+library(plotly)
 ####Data Loading####
 # setwd("./Viz/")
 df <- read_csv("/media/yiqiang/D/USF/622DataViz/final project/finalproject/Viz/operations.csv")
-df_takeoff <- df %>% filter(is.na(Country) == FALSE & is.na(`Target Longitude`) == FALSE &
-                        is.na(`Takeoff Longitude`) == FALSE) %>%
-  filter(`Takeoff Latitude` != '4248', `Takeoff Longitude` != 1355) %>%
-  filter(`Target Longitude` > 0, `Takeoff Longitude` > 0, `Target Latitude` > 0, `Target Longitude` <=360)%>% 
-  mutate(id=1:n()) %>% st_as_sf(., coords = c("Takeoff Longitude", "Takeoff Latitude"))
+df <- df %>% filter(is.na(Country) == FALSE & is.na(`Target Longitude`) == FALSE & is.na(`Takeoff Longitude`) == FALSE) %>%
+        filter(`Takeoff Latitude` != '4248', `Takeoff Longitude` != 1355) %>%
+          filter(`Target Longitude` > 0, `Takeoff Longitude` > 0, `Target Latitude` > 0, `Target Longitude` <=360) %>% 
+            mutate(id=1:n())
+df$`Mission Date` <- as.Date(anytime::anydate(df$`Mission Date`))
+# df$year <- as.numeric(strftime(df$`Mission Date`, format = "%Y"))
+# df$week <- as.numeric(strftime(df$`Mission Date`, format = "%V"))
+df$start_week <- cut(df$`Mission Date`, "week")
 
-df <- df %>% filter(is.na(Country) == FALSE & is.na(`Target Longitude`) == FALSE &
-                      is.na(`Takeoff Longitude`) == FALSE) %>%
-    filter(`Takeoff Latitude` != '4248', `Takeoff Longitude` != 1355) %>%
-  filter(`Target Longitude` > 0, `Takeoff Longitude` > 0, `Target Latitude` > 0, `Target Longitude` <=360) %>% 
-  mutate(id=1:n()) %>% st_as_sf(., coords = c("Target Longitude", "Target Latitude"))
-
-
+df_takeoff <- df %>% st_as_sf(., coords = c("Takeoff Longitude", "Takeoff Latitude"))
+df_target <- df %>% st_as_sf(., coords = c("Target Longitude", "Target Latitude"))
 
 
 ####Sever####
 shinyServer(function(input, output, session) {
-  vmap <- SharedData$new(df, key = ~id, group = "grp1")
+  target_map <- SharedData$new(df_target, key = ~id, group = "grp1")
   takeoff_map <- SharedData$new(df_takeoff, key = ~id, group = "grp2")
-  df_map <- vmap$data(TRUE)
-  lf <-   leaflet(vmap) %>%
+  # df_map <- target_map$data(TRUE)
+  lf <-   leaflet(target_map) %>%
     addTiles(urlTemplate = "https://api.mapbox.com/styles/v1/yiqiang/cjg1txxq83nha2so1hv5pt6cm/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoieWlxaWFuZyIsImEiOiJjamI2MjJ2aDgzZTJiMzdvMTEza25vN3czIn0.da7McqdO9XgggUE0LTCx3Q"
-    ) %>% 
+    ) %>%  addPolylines(data = gcIntermediate(df[ , c("Takeoff Longitude", "Takeoff Latitude")],
+                                                  df[ , c("Target Longitude", "Target Latitude")],
+                                                  n=20,
+                                                  addStartEnd=TRUE,
+                                                  sp=TRUE),  opacity = 0.3, fillOpacity = 0.2, color = "white", stroke = TRUE, weight = 1) %>%
     addCircleMarkers(fillOpacity = 0.1, color = "red", radius = 1, group = "grp1") %>%
     addCircleMarkers(data = takeoff_map, fillOpacity = 0.1, color = "blue", radius = 1, group = "grp2") %>%
     fitBounds(lng1=65.298593, lat1 = -15.124991, lng2 = -7.286442, lat2 = -173.134400) %>%
     setView(lat=24.719341, lng=68.718978, zoom=3) %>% 
     addMiniMap(tiles = "https://api.mapbox.com/styles/v1/yiqiang/cjg1txxq83nha2so1hv5pt6cm/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoieWlxaWFuZyIsImEiOiJjamI2MjJ2aDgzZTJiMzdvMTEza25vN3czIn0.da7McqdO9XgggUE0LTCx3Q",
-              toggleDisplay = T)  
-    # gcIntermediate(df_1[ , c("Takeoff Longitude", "Takeoff Latitude")],
-    #                df_1[ , c("Target Longitude", "Target Latitude")],
-    #                n=20,
-    #                addStartEnd=TRUE,
-    #                sp=TRUE) %>% addPolylines(opacity = 0.3, fillOpacity = 0.2,
-    #                               color = "white", stroke = TRUE, weight = 1)
-  output$mymap <- renderLeaflet({
-    # gcIntermediate(df[ , c("Target Longitude", "Target Latitude")],
-    #                df[ , c("Takeoff Longitude", "Takeoff Latitude")],
-    #                n=20,
-    #                addStartEnd=TRUE,
-    #                sp=TRUE) %>% leaflet() %>%
-    #   addTiles(
-    #     urlTemplate = "https://api.mapbox.com/styles/v1/yiqiang/cjg1txxq83nha2so1hv5pt6cm/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoieWlxaWFuZyIsImEiOiJjamI2MjJ2aDgzZTJiMzdvMTEza25vN3czIn0.da7McqdO9XgggUE0LTCx3Q"
-    #   ) %>% addPolylines(opacity = 0.3, fillOpacity = 0.2,
-    #                      color = "white", stroke = TRUE, weight = 1) %>%
-    #   addCircleMarkers(data = df, lat = ~`Target Latitude`, lng = ~`Target Longitude`,
-    #                    fillOpacity = 0.1, color = "red", radius = 1) %>%
-    #   addCircleMarkers(data = df, lat = ~`Takeoff Latitude`, lng = ~`Takeoff Longitude`,
-    #                    fillOpacity = 0.1, color = "blue", radius = 1) %>%
-    #   fitBounds(lng1=65.298593, lat1 = -15.124991, lng2 = -7.286442, lat2 = -173.134400) %>%
-    #   setView(lat=24.719341, lng=68.718978, zoom=3)
+              toggleDisplay = T)
   
-      not_rendered <- TRUE
+
+  not_rendered <- TRUE
+  output$mymap <- renderLeaflet({
       if(req(not_rendered,cancelOutput=TRUE)) {
         not_rendered <- FALSE
         lf
       }
     })
+  
+  observe({
+  output$time_series <- renderPlotly(({
+    tmp_selected_target <- target_map$data(withSelection = TRUE)
+    tmp_selected_takeoff <- takeoff_map$data(withSelection = TRUE)
+    tmp_data <- tmp_selected_target %>% filter(selected_ == TRUE) %>% group_by(`start_week`) %>% count()
+    p <- ggplot(tmp_data) +aes(x = `start_week`, y = `n`) + geom_point()
+    p <- ggplotly(p)
+    p$elementId <- NULL
+    p
+  }))})
+
 })
 
