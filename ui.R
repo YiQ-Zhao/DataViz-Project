@@ -22,7 +22,10 @@ shinyUI(dashboardPage(
       leafletOutput("mymap")
     ),
     fluidRow(
-      plotlyOutput("time_series")
+      column(6,
+      plotlyOutput("barplot")),
+      column(6,
+             plotlyOutput("piechart"))
     )
   )
 )

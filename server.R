@@ -9,18 +9,19 @@ library(sf)
 library(plotly)
 ####Data Loading####
 # setwd("./Viz/")
-df <- read_csv("/media/yiqiang/D/USF/622DataViz/final project/finalproject/Viz/operations.csv")
-df <- df %>% filter(is.na(Country) == FALSE & is.na(`Target Longitude`) == FALSE & is.na(`Takeoff Longitude`) == FALSE) %>%
-        filter(`Takeoff Latitude` != '4248', `Takeoff Longitude` != 1355) %>%
-          filter(`Target Longitude` > 0, `Takeoff Longitude` > 0, `Target Latitude` > 0, `Target Longitude` <=360) %>% 
-            mutate(id=1:n())
-df$`Mission Date` <- as.Date(anytime::anydate(df$`Mission Date`))
-# df$year <- as.numeric(strftime(df$`Mission Date`, format = "%Y"))
-# df$week <- as.numeric(strftime(df$`Mission Date`, format = "%V"))
-df$start_week <- cut(df$`Mission Date`, "week")
-
+# df <- read_csv("/media/yiqiang/D/USF/622DataViz/final project/finalproject/Viz/operations.csv")
+# df <- df %>% filter(is.na(Country) == FALSE & is.na(`Target Longitude`) == FALSE & is.na(`Takeoff Longitude`) == FALSE) %>%
+#         filter(`Takeoff Latitude` != '4248', `Takeoff Longitude` != 1355) %>%
+#           filter(`Target Longitude` > 0, `Takeoff Longitude` > 0, `Target Latitude` > 0, `Target Longitude` <=360) %>% 
+#             mutate(id=1:n())
+# df$`Mission Date` <- as.Date(anytime::anydate(df$`Mission Date`))
+# # df$year <- as.numeric(strftime(df$`Mission Date`, format = "%Y"))
+# # df$week <- as.numeric(strftime(df$`Mission Date`, format = "%V"))
+# df$start_week <- cut(df$`Mission Date`, "week")
+df <- read_csv("simplified_data.csv")
 df_takeoff <- df %>% st_as_sf(., coords = c("Takeoff Longitude", "Takeoff Latitude"))
 df_target <- df %>% st_as_sf(., coords = c("Target Longitude", "Target Latitude"))
+
 
 
 ####Sever####
@@ -52,15 +53,35 @@ shinyServer(function(input, output, session) {
     })
   
   observe({
-  output$time_series <- renderPlotly(({
-    tmp_selected_target <- target_map$data(withSelection = TRUE)
-    tmp_selected_takeoff <- takeoff_map$data(withSelection = TRUE)
-    tmp_data <- tmp_selected_target %>% filter(selected_ == TRUE) %>% group_by(`start_week`) %>% count()
-    p <- ggplot(tmp_data) +aes(x = `start_week`, y = `n`) + geom_point()
+    tmp_selected_target <- target_map$data(withSelection = TRUE) %>% filter(selected_ == TRUE)
+    tmp_selected_takeoff <- takeoff_map$data(withSelection = TRUE) %>% filter(selected_ == TRUE)
+    
+  output$barplot <- renderPlotly(({
+    tmp_data <- tmp_selected_target %>% group_by(`Aircraft Series`) %>% count()
+    tmp_data$Aircraft_Series <- tmp_data$`Aircraft Series`
+    p <- ggplot(tmp_data) + aes(x = `Aircraft_Series`, y = `n`, fill=`Aircraft_Series`) + geom_bar(stat = 'identity') + 
+      ggtitle("Distribution of Aircraft Series")  + ylab("Count") + xlab("") + theme(legend.position="none") +
+      theme(axis.text.x = element_text(angle = 30, hjust = 1), plot.background = element_rect(fill = "grey")) 
     p <- ggplotly(p)
     p$elementId <- NULL
     p
-  }))})
+  }))
+  
+  output$piechart <- renderPlotly(({
+    tmp_data <- tmp_selected_target %>% group_by(`TargetCountry`) %>% count()
+    p <- ggplot(tmp_data) + aes(x = `TargetCountry`, y = `n`, fill=`TargetCountry`) + geom_bar(stat = 'identity') + 
+      ggtitle("Distribution of Target Countries") + ylab("Count") + xlab("") + theme(legend.position="none") +
+      theme(axis.text.x = element_text(angle = 30, hjust = 1), plot.background = element_rect(fill = "grey"))
+    p <- ggplotly(p)
+    p$elementId <- NULL
+    p
+  }))
+  leafletProxy("mymap") %>% clearControls()
+  leafletProxy("mymap") %>% addLegend("topright", colors= c("blue", "red"), 
+                                       labels=c(nrow(tmp_selected_takeoff), nrow(tmp_selected_target)),
+                                       title="Num Selected",
+                                       opacity = 0.5)
+  })
 
 })
 
