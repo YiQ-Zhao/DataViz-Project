@@ -15,18 +15,48 @@ library(shinydashboard)
 # df <- SharedData$new(df)
 
 shinyUI(dashboardPage(
-  dashboardHeader(title = "Wordl Warr II Viz"),
-  dashboardSidebar(),
-  dashboardBody(
-    fluidRow(
-      leafletOutput("mymap")
-    ),
-    fluidRow(
-      column(6,
-      plotlyOutput("barplot")),
-      column(6,
-             plotlyOutput("piechart"))
+  dashboardHeader(title = "World War II Viz"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem(
+        "Maps",
+        tabName = "maps", 
+        icon = icon("globe")
+      )
     )
+  ),
+  dashboardBody(
+    tabItem(
+      tabName = "World War II",
+      fluidRow(
+      box(
+        # title = "Overview of World War II",
+        # collapsible = T,
+        width = "100%",
+        height = "100%",
+        leafletOutput("mymap", height = 350)
+       )
+      ),
+      fluidRow(
+        box(
+          width = 6, 
+          plotlyOutput("barplot", height = 300)
+        ),
+        box(
+          width = 6,
+          plotlyOutput("piechart", height = 300)
+        )
+      )
+    )
+    # fluidRow(
+    #   leafletOutput("mymap")
+    # ),
+    # fluidRow(
+    #   column(6,
+    #   plotlyOutput("barplot")),
+    #   column(6,
+    #          plotlyOutput("piechart"))
+    # )
   )
 )
 )
