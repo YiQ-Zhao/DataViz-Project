@@ -7,31 +7,42 @@ library(mapview)
 library(crosstalk)
 library(sf)
 library(plotly)
-####Data Loading####
-# setwd("./Viz/")
-# df <- read_csv("/media/yiqiang/D/USF/622DataViz/final project/finalproject/Viz/operations.csv")
+####Data Preprocessing####
+
+## Part 1: parse data to get map data
+
+# df <- read_csv("operations.csv")
 # df <- df %>% filter(is.na(Country) == FALSE & is.na(`Target Longitude`) == FALSE & is.na(`Takeoff Longitude`) == FALSE) %>%
 #         filter(`Takeoff Latitude` != '4248', `Takeoff Longitude` != 1355) %>%
 #           filter(`Target Longitude` > 0, `Takeoff Longitude` > 0, `Target Latitude` > 0, `Target Longitude` <=360) %>% 
 #             mutate(id=1:n())
 # df$`Mission Date` <- as.Date(anytime::anydate(df$`Mission Date`))
-# # df$year <- as.numeric(strftime(df$`Mission Date`, format = "%Y"))
-# # df$week <- as.numeric(strftime(df$`Mission Date`, format = "%V"))
 # df$start_week <- cut(df$`Mission Date`, "week")
-
 # flight_route <- gcIntermediate(df[ , c("Takeoff Longitude", "Takeoff Latitude")],
 #                                df[ , c("Target Longitude", "Target Latitude")],
 #                                n=20,
 #                                addStartEnd=TRUE,
 #                                sp=TRUE)
+# write.csv(df, file = "simplified_data.csv", row.names = FALSE)
 
+## Part 2: parse data to get obs count ts data
 
+# df <- read_csv("operations.csv")
+# Mission <-  df %>% select(`Mission Date`, `Mission ID`) %>% 
+#   filter(is.na(`Mission Date`) == F)
+# Mission$`Mission Date` <- as.Date(anytime::anydate(Mission$`Mission Date`))
+# Mission$start_month <- cut(Mission$`Mission Date`, "month") 
+# Mission$start_month = as.Date(Mission$start_month)
+# Mission <- Mission %>% arrange(`Mission Date`)
+# monthly_ct <- Mission %>% group_by(start_month) %>% summarise('ct' = n())
+# write.csv(monthly_ct, file = "monthly_obs_count.csv", row.names = FALSE)
 
 df <- read_csv("simplified_data.csv")
 load("flight_route.rda") # to accelerate the loading speed
 df_takeoff <- df %>% st_as_sf(., coords = c("Takeoff Longitude", "Takeoff Latitude"))
 df_target <- df %>% st_as_sf(., coords = c("Target Longitude", "Target Latitude"))
 
+ts_df <- read_csv("monthly_obs_count.csv")
 
 
 ####Sever####
@@ -99,6 +110,16 @@ shinyServer(function(input, output, session) {
                                        labels=c(paste("Takeoff:", nrow(tmp_selected_takeoff)), paste("Target:", nrow(tmp_selected_target))),
                                        title="Num",
                                        opacity = 0.5)
+  })
+  
+
+  output$timeseries <- renderPlotly({
+    p3 <- ts_df %>% plot_ly(x = ~start_month, y = ~ct, type = 'scatter', mode = 'lines') %>% 
+      layout(title='Monthly count of bomb mission', 
+             yaxis=list(title='Count'), 
+             xaxis=list(title=''))
+    p3$elementId <- NULL
+    p3
   })
 
 })

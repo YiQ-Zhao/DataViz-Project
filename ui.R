@@ -22,29 +22,44 @@ shinyUI(dashboardPage(
         "Maps",
         tabName = "maps", 
         icon = icon("globe")
+      ),
+      menuItem(
+        "Time",
+        tabName = "time",
+        icon = icon("calendar")
       )
     )
   ),
   dashboardBody(
-    tabItem(
-      tabName = "World War II",
-      fluidRow(
-      box(
-        # title = "Overview of World War II",
-        # collapsible = T,
-        width = "100%",
-        height = "100%",
-        leafletOutput("mymap", height = 350)
-       )
-      ),
-      fluidRow(
+    tabItems(
+      tabItem(
+        tabName = "maps",
+        fluidRow(
         box(
-          width = 6, 
-          plotlyOutput("barplot", height = 300)
+          # title = "Overview of World War II",
+          # collapsible = T,
+          width = "100%",
+          height = "100%",
+          leafletOutput("mymap", height = 350)
+         )
         ),
-        box(
-          width = 6,
-          plotlyOutput("piechart", height = 300)
+        fluidRow(
+          box(
+            width = 6, 
+            plotlyOutput("barplot", height = 300)
+          ),
+          box(
+            width = 6,
+            plotlyOutput("piechart", height = 300)
+          )
+        )
+      ),
+      tabItem(
+        tabName = "time",
+        fluidRow(
+          box(
+            plotlyOutput("timeseries")
+          )
         )
       )
     )
