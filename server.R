@@ -9,12 +9,12 @@ library(sf)
 library(plotly)
 library(chorddiag)
 ####Loading Data####
-raw_data <- read_csv("data/operations.csv")
+attack_data <- read_csv("data/attack_data.csv")
 df <- read_csv("data/simplified_data.csv")
 load("data/flight_route.rda") # to accelerate the loading speed
 df_takeoff <- df %>% st_as_sf(., coords = c("Takeoff Longitude", "Takeoff Latitude"))
 df_target <- df %>% st_as_sf(., coords = c("Target Longitude", "Target Latitude"))
-ts_df <- read_csv("data/monthly_obs_count.csv")
+ts_df <- read_csv("data/monthly_obs_count.csv", col_types = list("start_month" = col_datetime()))
 load("data/groupColors.rda")
 load("data/ajmatrix.rda")
 allies_axis_text <- read_file("data/axis_allies.txt")
@@ -44,8 +44,12 @@ shinyServer(function(input, output, session) {
   observe({
     tmp_selected_target <- target_map$data(withSelection = TRUE) %>% filter(selected_ == TRUE)
     tmp_selected_takeoff <- takeoff_map$data(withSelection = TRUE) %>% filter(selected_ == TRUE)
+    #if no points selected
+    if(nrow(tmp_selected_target) == 0 & nrow(tmp_selected_takeoff) == 0){
+      tmp_selected_target <- target_map$data(withSelection = TRUE)
+      tmp_selected_takeoff<- takeoff_map$data(withSelection = TRUE)
+    }
 
-    
   output$barplot <- renderPlotly(({
     tmp_data <- tmp_selected_target %>% group_by(`Aircraft Series`) %>% count() %>% arrange(n)
     tmp_data$Aircraft_Series <- tmp_data$`Aircraft Series`
@@ -92,12 +96,69 @@ shinyServer(function(input, output, session) {
                                        opacity = 0.5)
   })
   
-
+  annot1 <- list(xref = 'paper', yref = 'y', x = 0.02, y = 3000, xanchor = 'left', yanchor = 'middle',
+    text = ~paste("On 10 June 1940,\n Italy declares war on\nFrance and Britain\nand invades France."),
+    font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
+  
+  annot2 <- list(xref = 'paper', yref = 'y', x = 0.2, y = 4000, xanchor = 'left', yanchor = 'middle',
+                 text = ~paste("On 7 December 1941, Japanses\nattack Pearl Harbor.U.S. declares\nwar onAxis powers."),
+                 font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
+  
+  annot3 <- list(xref = 'paper', yref = 'y', x = 0.39, y = 2000, xanchor = 'left', yanchor = 'middle',
+                 text = ~paste("On 8 November 1942,\nU.S. and Britain land in\nFrench North Africa"),
+                 font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
+  
+  annot4 <- list(xref = 'paper', yref = 'y', x = 0.55, y = 3500, xanchor = 'left', yanchor = 'middle',
+                 text = ~paste("On 31 January 1943, German\n6th Army surrenders at Stalingrad"),
+                 font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
+  
+  annot5 <- list(xref = 'paper', yref = 'y', x = 0.60, y = 5500, xanchor = 'left', yanchor = 'middle',
+                 text = ~paste("On 6 June 1943, D-Day-Allie\ninvade Normandy"),
+                 font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
+  
+  annot6 <- list(xref = 'paper', yref = 'y', x = 0.77, y = 8000, xanchor = 'left', yanchor = 'middle',
+                 text = ~paste("On 7 May 1945, Germany\nsigns unconditional surrender"),
+                 font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
+  
+  annot7 <- list(xref = 'paper', yref = 'y', x = 0.83, y = 0, xanchor = 'left', yanchor = 'middle',
+                 text = ~paste("Yalta Conference"),
+                 font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = T)
+  
+  annot8 <- list(xref = 'paper', yref = 'y', x = 0.96, y = 4500, xanchor = 'left', yanchor = 'middle',
+                 text = ~paste("A-bombs dropped on Hiroshima\nand Nagasaki; Japan Surrenders"),
+                 font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
+  
   output$timeseries <- renderPlotly({
-    p3 <- ts_df %>% plot_ly(x = ~start_month, y = ~ct, type = 'scatter', mode = 'lines') %>% 
-      layout(title='Monthly count of bomb mission', 
-             yaxis=list(title='Count'), 
-             xaxis=list(title=''))
+    p3 <- ts_df %>% plot_ly(x = ~start_month, y = ~ct, 
+                            color = ~`Theater of Operations`,
+                            type = 'scatter', mode = 'lines', 
+                            colors = c("#8dd3c7", "#bebada", "#fb8072", "#80b1d3", "#377eb8")) %>% 
+      layout(yaxis=list(title='Count'), 
+             xaxis=list(title=''), shapes = list(list(type = "line", x0 = as.Date("1940-06-10"), 
+                                                      x1 = as.Date("1940-06-10"), y0 = 0, y1 = 11000,
+                                                      line=list(dash='dot', width=1)),
+                                                 list(type = "line", x0 = as.Date("1941-12-07"), 
+                                                      x1 = as.Date("1941-12-07"), y0 = 0, y1 = 11000,
+                                                      line=list(dash='dot', width=1)),
+                                                 list(type = "line", x0 = as.Date("1942-11-08"), 
+                                                      x1 = as.Date("1942-11-08"), y0 = 0, y1 = 11000,
+                                                      line=list(dash='dot', width=1)),
+                                                 list(type = "line", x0 = as.Date("1943-02-02"), 
+                                                      x1 = as.Date("1943-02-02"), y0 = 0, y1 = 11000,
+                                                      line=list(dash='dot', width=1)),
+                                                 list(type = "line", x0 = as.Date("1944-06-01"), 
+                                                      x1 = as.Date("1944-06-01"), y0 = 0, y1 = 11000,
+                                                      line=list(dash='dot', width=1)),
+                                                 list(type = "line", x0 = as.Date("1945-05-07"), 
+                                                      x1 = as.Date("1945-05-07"), y0 = 0, y1 = 11000,
+                                                      line=list(dash='dot', width=1)),
+                                                 list(type = "line", x0 = as.Date("1945-08-06"), 
+                                                      x1 = as.Date("1945-08-06"), y0 = 0, y1 = 11000,
+                                                      line=list(dash='dot', width=1)))) %>%
+      layout(annotations = annot1) %>% layout(annotations = annot2) %>% layout(annotations = annot3) %>%
+      layout(annotations = annot4) %>% layout(annotations = annot5) %>% layout(annotations = annot6) %>%
+      layout(annotations = annot7) %>% layout(annotations = annot8)
+             
     p3$elementId <- NULL
     p3
   })
@@ -114,12 +175,12 @@ shinyServer(function(input, output, session) {
   
   city_data <- reactive({
     if(is.null(input$sourceIndex)){
-      t <- raw_data %>% filter(., Country == "USA", 
+      t <- attack_data %>% filter(., Country == "USA", 
                          `Target Country` == "GERMANY") %>% 
         group_by(., `Target City`) %>% count() %>% arrange(desc(n)) %>% head(10) %>% as.data.frame()
       return(t)
     }else{
-      t <- raw_data %>% filter(., Country == groupNames[input$targetIndex], 
+      t <- attack_data %>% filter(., Country == groupNames[input$targetIndex], 
                          `Target Country` == groupNames[input$sourceIndex]) %>% 
         group_by(., `Target City`) %>% count() %>% arrange(desc(n)) %>% head(10) %>% as.data.frame()
       return(t)
@@ -143,8 +204,7 @@ shinyServer(function(input, output, session) {
                      p3})
 
 })
-  output$legend <- renderPlot({plot(0,0, axes = F, ann=FALSE, frame.plot = T)
-                               legend(x=c(-1),y=c(1), legend=c("12", "23"), fill = c("red", "blue"))})
+  
   output$allies_axis <- renderText(allies_axis_text)
   
 })

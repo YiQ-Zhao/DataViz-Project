@@ -18,13 +18,22 @@ write.csv(map_data, file = "data/simplified_data.csv", row.names = FALSE)
 save(flight_route, file="data/flight_route.rda")
 
 ## Part 2: parse data to get obs count ts data
-Mission <-  df %>% select(`Mission Date`, `Mission ID`) %>%
-  filter(is.na(`Mission Date`) == F)
+Mission <-  df %>% select(`Mission Date`, `Mission ID`, `Theater of Operations`) %>%
+  filter(is.na(`Mission Date`) == F, is.na(`Theater of Operations`) != TRUE, `Theater of Operations` != 'MADAGASCAR')
 Mission$`Mission Date` <- as.Date(anytime::anydate(Mission$`Mission Date`))
 Mission$start_month <- cut(Mission$`Mission Date`, "month")
 Mission$start_month = as.Date(Mission$start_month)
-Mission <- Mission %>% arrange(`Mission Date`)
-monthly_ct <- Mission %>% group_by(start_month) %>% summarise('ct' = n())
+
+Mission[Mission$`Theater of Operations` == 'ETO', "Theater of Operations"] <- 'Euro'
+Mission[Mission$`Theater of Operations` == 'PTO', "Theater of Operations"] <- 'Pacific'
+Mission[Mission$`Theater of Operations` == 'MTO', "Theater of Operations"] <- 'Mediterranean'
+Mission[Mission$`Theater of Operations` == 'CBI', "Theater of Operations"] <- 'Pacific'
+Mission[Mission$`Theater of Operations` == 'EAST AFRICA', "Theater of Operations"] <- 'Africa'
+monthly_ct <- Mission %>% group_by(start_month, `Theater of Operations`) %>% summarise('ct' = n())
+total_monthly_ct <- Mission %>% group_by(start_month) %>% summarise('ct' = n())
+total_monthly_ct$`Theater of Operations` <- 'Total'
+monthly_ct <- bind_rows(monthly_ct, total_monthly_ct)
+
 write.csv(monthly_ct, file = "data/monthly_obs_count.csv", row.names = FALSE)
 
 ## Part 3: chorddiag data
@@ -67,3 +76,7 @@ for(country in dimnames(ajmatrix)[[1]]){
 save(ajmatrix, file = "data/ajmatrix.rda")
 save(groupColors, file="data/groupColors.rda")
 
+## Part 4: Country - Target Country
+attack_data <- df %>% filter(is.na(Country) != T, is.na(`Target Country`) != T, is.na(`Target City`) != T) %>% 
+  select(Country, `Target Country`, `Target City`)
+write.csv(attack_data, file = "data/attack_data.csv", row.names = FALSE)
