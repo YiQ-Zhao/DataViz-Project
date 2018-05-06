@@ -116,7 +116,7 @@ shinyServer(function(input, output, session) {
                  font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
   
   annot5 <- list(xref = 'paper', yref = 'y', x = 0.60, y = 5500, xanchor = 'left', yanchor = 'middle',
-                 text = ~paste("On 6 June 1943, D-Day-Allie\ninvade Normandy"),
+                 text = ~paste("On 6 June 1944, D-Day-Allie\ninvade Normandy"),
                  font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
   
   annot6 <- list(xref = 'paper', yref = 'y', x = 0.77, y = 8000, xanchor = 'left', yanchor = 'middle',
