@@ -13,7 +13,7 @@ shinyUI(dashboardPage(
   dashboardHeader(title = "World War II",
                   dropdownMenu(
                     type = "notifications", 
-                    icon = icon("question-circle-o"),
+                    icon = icon("linkedin"),
                     badgeStatus = NULL,
                     headerText = "Contact",
                     notificationItem("Yiqiang Zhao", icon = icon("linkedin-square"),
