@@ -7,12 +7,7 @@ library(mapview)
 library(crosstalk)
 library(plotly)
 library(shinydashboard)
-# df <- read_csv("operations.csv")
-# df <- st_as_sf(df) %>% filter(is.na(Country) == FALSE & is.na(`Target Longitude`) == FALSE &
-#                       is.na(`Takeoff Longitude`) == FALSE) %>% 
-#   filter(`Takeoff Latitude` != '4248', `Takeoff Longitude` != 1355) %>%
-#   filter(`Target Longitude` > 0, `Takeoff Longitude` > 0)
-# df <- SharedData$new(df)
+
 
 shinyUI(dashboardPage(
   dashboardHeader(title = "World War II Viz"),
@@ -56,11 +51,33 @@ shinyUI(dashboardPage(
       ),
       tabItem(
         tabName = "time",
+        # fluidRow(box(column(width=12,
+        #                 img(src="world-war-ii-facts.jpg", width=1000)))),
+        
         fluidRow(
-          box(
-            plotlyOutput("timeseries")
-          )
-        )
+        box(title = tags$b("Military Allies in WW2"),
+            status = "primary",
+            solidHeader = F,
+            collapsible = F,
+            width = 12,
+            fluidRow(
+              tags$style("#allies_axis {font-size:15px;
+               display:block; }"),
+              column(width = 9, 
+                     htmlOutput("allies_axis")),
+              column(width = 3, align = "center",
+                     img(src = "allied powers.jpg", height = '170px', width = '220px'))
+              ))
+            ),
+        fluidRow(box(
+          splitLayout(
+            cellWidths = c("40%", "60%"),
+            cellArgs = list(style = "padding: 6px"),
+            chorddiagOutput("chorddiag", height = 450),
+            plotlyOutput("barplot2", height = 450)
+          ), width = 12
+        ))
+
       )
     )
     # fluidRow(
