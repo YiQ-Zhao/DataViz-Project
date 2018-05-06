@@ -7,21 +7,26 @@ library(mapview)
 library(crosstalk)
 library(plotly)
 library(shinydashboard)
-
+library(chorddiag)
 
 shinyUI(dashboardPage(
-  dashboardHeader(title = "World War II Viz"),
+  dashboardHeader(title = "World War II"),
   dashboardSidebar(
     sidebarMenu(
       menuItem(
-        "Maps",
+        "Map",
         tabName = "maps", 
         icon = icon("globe")
       ),
       menuItem(
-        "Time",
-        tabName = "time",
+        "Alliance",
+        tabName = "alliance",
         icon = icon("calendar")
+      ),
+      menuItem(
+        "Timeline",
+        tabName = "timeline",
+        icon = icon("line-chart")
       )
     )
   ),
@@ -50,12 +55,12 @@ shinyUI(dashboardPage(
         )
       ),
       tabItem(
-        tabName = "time",
+        tabName = "alliance",
         # fluidRow(box(column(width=12,
         #                 img(src="world-war-ii-facts.jpg", width=1000)))),
         
         fluidRow(
-        box(title = tags$b("Military Allies in WW2"),
+        box(title = tags$b("Military Alliance in WW2"),
             status = "primary",
             solidHeader = F,
             collapsible = F,
@@ -71,8 +76,9 @@ shinyUI(dashboardPage(
             ),
         fluidRow(box(
           splitLayout(
-            cellWidths = c("40%", "60%"),
+            cellWidths = c("12%", "38%", "50%"),
             cellArgs = list(style = "padding: 6px"),
+            column(width = 1, img(src = "Legend.png", height = '84px', width = '100px'), height = 450),
             chorddiagOutput("chorddiag", height = 450),
             plotlyOutput("barplot2", height = 450)
           ), width = 12
@@ -80,15 +86,6 @@ shinyUI(dashboardPage(
 
       )
     )
-    # fluidRow(
-    #   leafletOutput("mymap")
-    # ),
-    # fluidRow(
-    #   column(6,
-    #   plotlyOutput("barplot")),
-    #   column(6,
-    #          plotlyOutput("piechart"))
-    # )
   )
 )
 )

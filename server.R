@@ -107,7 +107,7 @@ shinyServer(function(input, output, session) {
               showGroupnames = FALSE, tooltipGroupConnector = ' <- ',
               clickAction = "Shiny.onInputChange('sourceIndex', d.source.index+1);
                                  Shiny.onInputChange('targetIndex', d.target.index+1);",
-              margin = 35, width = 10)
+              margin = 35, width = 10) 
   )
   
   groupNames <- dimnames(ajmatrix)[[1]]
@@ -143,7 +143,8 @@ shinyServer(function(input, output, session) {
                      p3})
 
 })
-  
+  output$legend <- renderPlot({plot(0,0, axes = F, ann=FALSE, frame.plot = T)
+                               legend(x=c(-1),y=c(1), legend=c("12", "23"), fill = c("red", "blue"))})
   output$allies_axis <- renderText(allies_axis_text)
   
 })
