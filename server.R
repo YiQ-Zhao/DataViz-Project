@@ -18,6 +18,7 @@ ts_df <- read_csv("data/monthly_obs_count.csv", col_types = list("start_month" =
 load("data/groupColors.rda")
 load("data/ajmatrix.rda")
 allies_axis_text <- read_file("data/axis_allies.txt")
+intro_text <- read_file("data/intro.txt")
 ####Sever####
 shinyServer(function(input, output, session) {
   target_map <- SharedData$new(df_target, key = ~id, group = "grp1")
@@ -206,6 +207,7 @@ shinyServer(function(input, output, session) {
 })
   
   output$allies_axis <- renderText(allies_axis_text)
-  
+  output$intro <- renderText((intro_text))
+  output$instruction <- renderText(paste("Use the selection tool on the map to highlight the target area and update plots"))
 })
 

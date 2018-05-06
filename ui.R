@@ -19,21 +19,23 @@ shinyUI(dashboardPage(
         icon = icon("line-chart")
       ),
       menuItem(
+        "Alliance",
+        tabName = "alliance",
+        icon = icon("fighter-jet")),
+      menuItem(
         "Map",
         tabName = "maps", 
         icon = icon("globe")
-      ),
-      menuItem(
-        "Alliance",
-        tabName = "alliance",
-        icon = icon("fighter-jet")
-      )
-    )
-  ),
+      ))
+    ),
   dashboardBody(
     tabItems(
       tabItem(
         tabName = "maps",
+        fluidRow(
+          tags$style("#instruction {font-size:15px;
+               font-style:italic; }"),
+          column(width = 5, htmlOutput("instruction"))),
         fluidRow(
         box(
           width = "100%",
@@ -75,9 +77,17 @@ shinyUI(dashboardPage(
         tabName = "timeline",
         fluidRow(
           box(title = tags$b("Count of Bombing Mission in WW2"), solidHeader = TRUE,
-              plotlyOutput("timeseries"), width = 12)
-        ))
-    )
-  )
+              plotlyOutput("timeseries"), width = 12)),
+        fluidRow(box(title = tags$b("WW2 Introduction"), status = "primary",
+                     solidHeader = F, collapsible = F, width = 12,
+                     fluidRow(
+                       tags$style("#allies_axis {font-size:15px;
+               display:block; }"),
+                       column(width = 9, htmlOutput("intro")),
+                       column(width = 3, align = "center",
+                              img(src = "uss_arizona_burning_sinking-P.jpeg", height = '170px', width = '240px')))
+                 )
+                 ))
+    ))
 )
 )
