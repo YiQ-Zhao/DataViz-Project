@@ -18,7 +18,7 @@ write.csv(map_data, file = "data/simplified_data.csv", row.names = FALSE)
 save(flight_route, file="data/flight_route.rda")
 
 ## Part 2: parse data to get obs count ts data
-Mission <-  df %>% select(`Mission Date`, `Mission ID`, `Theater of Operations`) %>%
+Mission <-  df %>% select(`Mission Date`, `Mission ID`, `Theater of Operations`, `Aircraft Series`) %>%
   filter(is.na(`Mission Date`) == F, is.na(`Theater of Operations`) != TRUE, `Theater of Operations` != 'MADAGASCAR')
 Mission$`Mission Date` <- as.Date(anytime::anydate(Mission$`Mission Date`))
 Mission$start_month <- cut(Mission$`Mission Date`, "month")
@@ -80,3 +80,10 @@ save(groupColors, file="data/groupColors.rda")
 attack_data <- df %>% filter(is.na(Country) != T, is.na(`Target Country`) != T, is.na(`Target City`) != T) %>% 
   select(Country, `Target Country`, `Target City`)
 write.csv(attack_data, file = "data/attack_data.csv", row.names = FALSE)
+
+## Part 5: Aircraft Series Count
+as_ct <- Mission %>% filter(., is.na(`Aircraft Series`) != T, `Aircraft Series` %in% c('B24', 'B17', 'B25', 'B26', 'A20', 'GB17')) %>% 
+  group_by(`Aircraft Series`, `Theater of Operations`) %>% 
+  count() %>% reshape2::dcast(., `Aircraft Series` ~ `Theater of Operations`, value.var = "n")
+as_ct[is.na(as_ct)] <- 0
+write.csv(as_ct, file = "data/aircraft_data.csv", row.names = FALSE)

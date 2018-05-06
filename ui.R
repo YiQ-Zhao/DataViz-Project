@@ -10,7 +10,17 @@ library(shinydashboard)
 library(chorddiag)
 
 shinyUI(dashboardPage(
-  dashboardHeader(title = "World War II"),
+  dashboardHeader(title = "World War II",
+                  dropdownMenu(
+                    type = "notifications", 
+                    icon = icon("question-circle-o"),
+                    badgeStatus = NULL,
+                    headerText = "Contact",
+                    notificationItem("Yiqiang Zhao", icon = icon("linkedin-square"),
+                                     href = "https://www.linkedin.com/in/yqzhao52/"),
+                    notificationItem("Jay Xu", icon = icon("linkedin-square"),
+                                     href = "https://www.linkedin.com/in/zhengjie-xu-b75311a7/")
+                  )),
   dashboardSidebar(
     sidebarMenu(
       menuItem(
@@ -65,7 +75,9 @@ shinyUI(dashboardPage(
               column(width = 9, 
                      htmlOutput("allies_axis")),
               column(width = 3, align = "center",
-                     img(src = "allied powers.jpg", height = '170px', width = '220px'))))),
+                     fluidRow(img(src = "allied powers.jpg", height = '170px', width = '250px')),
+                     fluidRow(tags$style("#fig3_text {font-size:12px; font-style:italic;}"),
+                              htmlOutput("fig3_text"), align = "center"))))),
         fluidRow(
           box(splitLayout(
               cellWidths = c("12%", "38%", "50%"),
@@ -78,16 +90,37 @@ shinyUI(dashboardPage(
         fluidRow(
           box(title = tags$b("Count of Bombing Mission in WW2"), solidHeader = TRUE,
               plotlyOutput("timeseries"), width = 12)),
-        fluidRow(box(title = tags$b("WW2 Introduction"), status = "primary",
-                     solidHeader = F, collapsible = F, width = 12,
-                     fluidRow(
-                       tags$style("#allies_axis {font-size:15px;
+        fluidRow(
+          # box(title = tags$b("WW2 Introduction"), status = "primary",
+          #            solidHeader = F, collapsible = F, width = 12,
+          #            fluidRow(
+          #              tags$style("#allies_axis {font-size:15px;
+          #      display:block; }"),
+          #              column(width = 9, htmlOutput("intro")),
+          #              column(width = 3, align = "center",
+          #                     img(src = "uss_arizona_burning_sinking-P.jpeg", height = '170px', width = '240px'))))
+          tabBox(width=12,
+            tabPanel(tags$b("WW2 Introduction"), 
+                                 fluidRow(
+                                   tags$style("#allies_axis {font-size:15px;
                display:block; }"),
-                       column(width = 9, htmlOutput("intro")),
-                       column(width = 3, align = "center",
-                              img(src = "uss_arizona_burning_sinking-P.jpeg", height = '170px', width = '240px')))
-                 )
-                 ))
+                                   column(width = 9, htmlOutput("intro")),
+                                   column(width = 3, 
+                                          fluidRow(align = "center",
+                                          img(src = "uss_arizona_burning_sinking-P.jpeg", height = '170px', width = '240px')),
+                                          fluidRow(tags$style("#fig1_text {font-size:12px; font-style:italic;}"),
+                                                   htmlOutput("fig1_text"), align = "center")))),
+            tabPanel(tags$b("Aircraft Series in WW2"), fluidRow(
+              tags$style("#allies_axis {font-size:15px;
+               display:block; }"),
+              column(width = 9, plotlyOutput("aircraft_series")),
+              column(width = 3, 
+                     fluidRow(div(img(src = "b24b25b17.jpg", height = '190px', width = '270px')), style="text-align: center;"),
+                     fluidRow(tags$style("#fig2_text {font-size:12px; font-style:italic;}"),
+                       htmlOutput("fig2_text"), align = "center"),
+                     fluidRow(tags$style("#fig2_text {font-size:14px;}"),htmlOutput("aircraft_text")))))
+          )
+        )
     ))
-)
-)
+)))
+

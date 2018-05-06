@@ -19,6 +19,8 @@ load("data/groupColors.rda")
 load("data/ajmatrix.rda")
 allies_axis_text <- read_file("data/axis_allies.txt")
 intro_text <- read_file("data/intro.txt")
+as_ct <- read_csv("data/aircraft_data.csv")
+aircraft_text <- read_file("data/aircraft_text.txt")
 ####Sever####
 shinyServer(function(input, output, session) {
   target_map <- SharedData$new(df_target, key = ~id, group = "grp1")
@@ -159,7 +161,6 @@ shinyServer(function(input, output, session) {
       layout(annotations = annot1) %>% layout(annotations = annot2) %>% layout(annotations = annot3) %>%
       layout(annotations = annot4) %>% layout(annotations = annot5) %>% layout(annotations = annot6) %>%
       layout(annotations = annot7) %>% layout(annotations = annot8)
-             
     p3$elementId <- NULL
     p3
   })
@@ -207,7 +208,24 @@ shinyServer(function(input, output, session) {
 })
   
   output$allies_axis <- renderText(allies_axis_text)
-  output$intro <- renderText((intro_text))
+  output$intro <- renderText(intro_text)
+  output$fig2_text <- renderText(paste("From top to bottom: B-25, B-17, B-24"))
+  output$fig1_text <- renderText(paste("USS Arizona (BB-39) sunk and burning furiously"))
+  output$fig3_text <- renderText(paste("The Big Three - The Allied Leaders at the Yalta Conference"))
   output$instruction <- renderText(paste("Use the selection tool on the map to highlight the target area and update plots"))
+  output$aircraft_text <- renderText(aircraft_text)
+  output$aircraft_series <- renderPlotly({p4 <- plot_ly(as_ct, x = ~Euro, y = ~`Aircraft Series`, type = "bar", orientation = "h", name = "Euro",
+                                                       marker = list(color = '#bebada', line = list(color = '#bebada', width = 3))) %>%
+                                           add_trace(x = ~Mediterranean, name = 'Mediterranean', 
+                                                     marker = list(color = '#fb8072', line = list(color = '#fb8072', width = 3))) %>% 
+                                           add_trace(x = ~Pacific, name = 'Pacific', 
+                                                     marker = list(color = '#80b1d3', line = list(color = '#80b1d3', width = 3))) %>% 
+                                           add_trace(x = ~Africa, name = 'Africa', 
+                                                     marker = list(color = '#8dd3c7', line = list(color = '#8dd3c7', width = 3))) %>%
+                                           layout(barmode = "stack",
+                                                  xaxis = list(title = ""),
+                                                  yaxis = list(title = ""))
+                                         p3$elementId <- NULL
+                                         p3})
 })
 
