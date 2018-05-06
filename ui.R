@@ -20,7 +20,15 @@ shinyUI(dashboardPage(
                                      href = "https://www.linkedin.com/in/yqzhao52/"),
                     notificationItem("Jay Xu", icon = icon("linkedin-square"),
                                      href = "https://www.linkedin.com/in/zhengjie-xu-b75311a7/")
-                  )),
+                  ),
+                  dropdownMenu(type = "notifications", icon = icon("github"),
+                               badgeStatus = NULL,
+                               headerText = "Github & Data",
+                               notificationItem("Source Code", icon = icon("github-square"),
+                                                href = "https://github.com/zhengjxu/dataviz"),
+                               notificationItem("Data", icon = icon("database"),
+                                                href = "https://www.kaggle.com/usaf/world-war-ii/data")
+                               )),
   dashboardSidebar(
     sidebarMenu(
       menuItem(

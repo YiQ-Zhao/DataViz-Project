@@ -212,7 +212,7 @@ shinyServer(function(input, output, session) {
   output$fig2_text <- renderText(paste("From top to bottom: B-25, B-17, B-24"))
   output$fig1_text <- renderText(paste("USS Arizona (BB-39) sunk and burning furiously"))
   output$fig3_text <- renderText(paste("The Big Three - The Allied Leaders at the Yalta Conference"))
-  output$instruction <- renderText(paste("Use the selection tool on the map to highlight the target area and update plots"))
+  output$instruction <- renderText(paste("* Use the selection tool on the map to highlight the target area and update plots"))
   output$aircraft_text <- renderText(aircraft_text)
   output$aircraft_series <- renderPlotly({p4 <- plot_ly(as_ct, x = ~Euro, y = ~`Aircraft Series`, type = "bar", orientation = "h", name = "Euro",
                                                        marker = list(color = '#bebada', line = list(color = '#bebada', width = 3))) %>%
