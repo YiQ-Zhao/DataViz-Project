@@ -225,7 +225,7 @@ shinyServer(function(input, output, session) {
                                            layout(barmode = "stack",
                                                   xaxis = list(title = ""),
                                                   yaxis = list(title = ""))
-                                         p3$elementId <- NULL
-                                         p3})
+                                         p4$elementId <- NULL
+                                         p4})
 })
 
