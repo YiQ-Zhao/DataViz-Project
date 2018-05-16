@@ -10,7 +10,9 @@ library(shinydashboard)
 library(chorddiag)
 
 shinyUI(dashboardPage(
+  # Headers including Github and Linkedin
   dashboardHeader(title = "World War II",
+                  # Linkedin
                   dropdownMenu(
                     type = "notifications", 
                     icon = icon("linkedin"),
@@ -21,6 +23,7 @@ shinyUI(dashboardPage(
                     notificationItem("Jay Xu", icon = icon("linkedin-square"),
                                      href = "https://www.linkedin.com/in/zhengjie-xu-b75311a7/")
                   ),
+                  # Github
                   dropdownMenu(type = "notifications", icon = icon("github"),
                                badgeStatus = NULL,
                                headerText = "Github & Data",
@@ -29,6 +32,7 @@ shinyUI(dashboardPage(
                                notificationItem("Data", icon = icon("database"),
                                                 href = "https://www.kaggle.com/usaf/world-war-ii/data")
                                )),
+  # Sidebar
   dashboardSidebar(
     sidebarMenu(
       menuItem(
@@ -46,8 +50,10 @@ shinyUI(dashboardPage(
         icon = icon("globe")
       ))
     ),
+  # Body
   dashboardBody(
     tabItems(
+      # Maps
       tabItem(
         tabName = "maps",
         fluidRow(
@@ -72,6 +78,7 @@ shinyUI(dashboardPage(
           )
         )
       ),
+      # Alliances
       tabItem(
         tabName = "alliance",
         fluidRow(
@@ -93,20 +100,13 @@ shinyUI(dashboardPage(
               column(width = 1, img(src = "Legend.png", height = '84px', width = '100px'), height = 450),
               chorddiagOutput("chorddiag", height = 450),
               plotlyOutput("barplot2", height = 450)), width = 12))),
+      # Timeline
       tabItem(
         tabName = "timeline",
         fluidRow(
           box(title = tags$b("Count of Bombing Mission in WW2"), solidHeader = TRUE,
               plotlyOutput("timeseries"), width = 12)),
         fluidRow(
-          # box(title = tags$b("WW2 Introduction"), status = "primary",
-          #            solidHeader = F, collapsible = F, width = 12,
-          #            fluidRow(
-          #              tags$style("#allies_axis {font-size:15px;
-          #      display:block; }"),
-          #              column(width = 9, htmlOutput("intro")),
-          #              column(width = 3, align = "center",
-          #                     img(src = "uss_arizona_burning_sinking-P.jpeg", height = '170px', width = '240px'))))
           tabBox(width=12,
             tabPanel(tags$b("WW2 Introduction"), 
                                  fluidRow(

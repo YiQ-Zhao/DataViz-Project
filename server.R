@@ -25,6 +25,7 @@ aircraft_text <- read_file("data/aircraft_text.txt")
 shinyServer(function(input, output, session) {
   target_map <- SharedData$new(df_target, key = ~id, group = "grp1")
   takeoff_map <- SharedData$new(df_takeoff, key = ~id, group = "grp2")
+  # add flight routes
   lf <-   leaflet(target_map) %>%
     addTiles(urlTemplate = "https://api.mapbox.com/styles/v1/yiqiang/cjglw67l500262tqmguz0efum/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoieWlxaWFuZyIsImEiOiJjamI2MjJ2aDgzZTJiMzdvMTEza25vN3czIn0.da7McqdO9XgggUE0LTCx3Q"
     ) %>%  addPolylines(data = flight_route,  opacity = 0.3, fillOpacity = 0.2, color = "black", stroke = TRUE, weight = 1) %>%
@@ -43,16 +44,16 @@ shinyServer(function(input, output, session) {
         lf
       }
     })
-  
+  # highlight selection
   observe({
     tmp_selected_target <- target_map$data(withSelection = TRUE) %>% filter(selected_ == TRUE)
     tmp_selected_takeoff <- takeoff_map$data(withSelection = TRUE) %>% filter(selected_ == TRUE)
-    #if no points selected
+    # if no points selected
     if(nrow(tmp_selected_target) == 0 & nrow(tmp_selected_takeoff) == 0){
       tmp_selected_target <- target_map$data(withSelection = TRUE)
       tmp_selected_takeoff<- takeoff_map$data(withSelection = TRUE)
     }
-
+  # render barplot of aircraft series
   output$barplot <- renderPlotly(({
     tmp_data <- tmp_selected_target %>% group_by(`Aircraft Series`) %>% count() %>% arrange(n)
     tmp_data$Aircraft_Series <- tmp_data$`Aircraft Series`
@@ -74,6 +75,7 @@ shinyServer(function(input, output, session) {
     p
   }))
   
+  # render piechart of attacked countries
   output$piechart <- renderPlotly(({
     colors <- c(rev(c("#deebf7", "#c6dbef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#08519c")),
                 rep("#deebf7", 20))
@@ -92,6 +94,7 @@ shinyServer(function(input, output, session) {
     p2$elementId <- NULL
     p2
   }))
+  # selection legend
   leafletProxy("mymap") %>% clearControls()
   leafletProxy("mymap") %>% addLegend("topright", colors= c("#969696", "#08519c"), 
                                        labels=c(paste("Takeoff:", nrow(tmp_selected_takeoff)), paste("Target:", nrow(tmp_selected_target))),
@@ -99,38 +102,39 @@ shinyServer(function(input, output, session) {
                                        opacity = 0.5)
   })
   
+  # annotation 1
   annot1 <- list(xref = 'paper', yref = 'y', x = 0.02, y = 3000, xanchor = 'left', yanchor = 'middle',
     text = ~paste("On 10 June 1940,\n Italy declares war on\nFrance and Britain\nand invades France."),
     font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
-  
+  # annotation 2
   annot2 <- list(xref = 'paper', yref = 'y', x = 0.2, y = 4000, xanchor = 'left', yanchor = 'middle',
                  text = ~paste("On 7 December 1941, Japanses\nattack Pearl Harbor.U.S. declares\nwar onAxis powers."),
                  font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
-  
+  # annotation 3
   annot3 <- list(xref = 'paper', yref = 'y', x = 0.39, y = 2000, xanchor = 'left', yanchor = 'middle',
                  text = ~paste("On 8 November 1942,\nU.S. and Britain land in\nFrench North Africa"),
                  font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
-  
+  # annotation 4
   annot4 <- list(xref = 'paper', yref = 'y', x = 0.55, y = 3500, xanchor = 'left', yanchor = 'middle',
                  text = ~paste("On 31 January 1943, German\n6th Army surrenders at Stalingrad"),
                  font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
-  
+  # annotation 5
   annot5 <- list(xref = 'paper', yref = 'y', x = 0.60, y = 5500, xanchor = 'left', yanchor = 'middle',
                  text = ~paste("On 6 June 1944, D-Day-Allie\ninvade Normandy"),
                  font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
-  
+  # annotation 6
   annot6 <- list(xref = 'paper', yref = 'y', x = 0.77, y = 8000, xanchor = 'left', yanchor = 'middle',
                  text = ~paste("On 7 May 1945, Germany\nsigns unconditional surrender"),
                  font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
-  
+  # annotation 7
   annot7 <- list(xref = 'paper', yref = 'y', x = 0.83, y = 0, xanchor = 'left', yanchor = 'middle',
                  text = ~paste("Yalta Conference"),
                  font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = T)
-  
+  # annotation 8
   annot8 <- list(xref = 'paper', yref = 'y', x = 0.96, y = 4500, xanchor = 'left', yanchor = 'middle',
                  text = ~paste("A-bombs dropped on Hiroshima\nand Nagasaki; Japan Surrenders"),
                  font = list(family = 'Arial', size = 10, color = 'rgba(67,67,67,1)'), showarrow = F)
-  
+  # timeline of important events
   output$timeseries <- renderPlotly({
     p3 <- ts_df %>% plot_ly(x = ~start_month, y = ~ct, 
                             color = ~`Theater of Operations`,
@@ -164,7 +168,7 @@ shinyServer(function(input, output, session) {
     p3$elementId <- NULL
     p3
   })
-  
+  # choord diagram
   output$chorddiag <- renderChorddiag(
     chorddiag(ajmatrix, groupColors = groupColors, groupnamePadding = 40, 
               showGroupnames = FALSE, tooltipGroupConnector = ' <- ',
@@ -188,6 +192,7 @@ shinyServer(function(input, output, session) {
       return(t)
   }
     })
+  # target cities affliated with the selected country
   observe({
     tmp_city_data <- city_data()
     output$barplot2 <- renderPlotly({p3 <- ggplot(tmp_city_data) + 
