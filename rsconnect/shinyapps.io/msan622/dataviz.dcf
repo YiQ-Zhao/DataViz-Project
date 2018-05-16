@@ -5,6 +5,6 @@ account: msan622
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 334705
-bundleId: 1348663
+bundleId: 1377481
 url: https://msan622.shinyapps.io/dataviz/
-when: 1525145196.67309
+when: 1526501060.02373
